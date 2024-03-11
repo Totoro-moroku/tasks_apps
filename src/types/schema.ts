@@ -3,7 +3,7 @@ export type Json =
   | number
   | boolean
   | null
-  | { [key: string]: Json }
+  | { [key: string]: Json | undefined }
   | Json[]
 
 export interface Database {
@@ -34,26 +34,244 @@ export interface Database {
   }
   public: {
     Tables: {
-      Tasks: {
+      comments: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          task_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          task_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          task_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "comments_task_id_fkey"
+            columns: ["task_id"]
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "comments_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      custom_task_status: {
+        Row: {
+          color: string
+          id: string
+          name: string
+          origin_status: string
+        }
+        Insert: {
+          color?: string
+          id?: string
+          name: string
+          origin_status: string
+        }
+        Update: {
+          color?: string
+          id?: string
+          name?: string
+          origin_status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custom_task_status_origin_status_fkey"
+            columns: ["origin_status"]
+            referencedRelation: "origin_task_status"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      origin_task_status: {
+        Row: {
+          default_color: string
+          id: string
+          name: string
+        }
+        Insert: {
+          default_color?: string
+          id?: string
+          name: string
+        }
+        Update: {
+          default_color?: string
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          base_language: string
+          description: string | null
+          full_name: string | null
+          id: string
+          location: string | null
+          public: boolean
+          self_introduction: string | null
+          social_link: string[] | null
+          updated_at: string | null
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          base_language?: string
+          description?: string | null
+          full_name?: string | null
+          id: string
+          location?: string | null
+          public?: boolean
+          self_introduction?: string | null
+          social_link?: string[] | null
+          updated_at?: string | null
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          base_language?: string
+          description?: string | null
+          full_name?: string | null
+          id?: string
+          location?: string | null
+          public?: boolean
+          self_introduction?: string | null
+          social_link?: string[] | null
+          updated_at?: string | null
+          username?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      projects: {
+        Row: {
+          create_user: string | null
+          created_at: string | null
+          id: string
+          project_id: string | null
+          project_name: string | null
+        }
+        Insert: {
+          create_user?: string | null
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          project_name?: string | null
+        }
+        Update: {
+          create_user?: string | null
+          created_at?: string | null
+          id?: string
+          project_id?: string | null
+          project_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "projects_create_user_fkey"
+            columns: ["create_user"]
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
+      relations: {
         Row: {
           created_at: string | null
-          description: string | null
           id: string
-          title: string
         }
         Insert: {
           created_at?: string | null
-          description?: string | null
           id?: string
-          title: string
         }
         Update: {
           created_at?: string | null
-          description?: string | null
           id?: string
-          title?: string
         }
         Relationships: []
+      }
+      tasks: {
+        Row: {
+          content: string | null
+          created_at: string | null
+          id: string
+          manage_user_id: string | null
+          relation: string | null
+          status: string
+          title: string
+          update_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          manage_user_id?: string | null
+          relation?: string | null
+          status?: string
+          title: string
+          update_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          content?: string | null
+          created_at?: string | null
+          id?: string
+          manage_user_id?: string | null
+          relation?: string | null
+          status?: string
+          title?: string
+          update_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_manage_user_id_fkey"
+            columns: ["manage_user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_relation_fkey"
+            columns: ["relation"]
+            referencedRelation: "relations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_status_fkey"
+            columns: ["status"]
+            referencedRelation: "custom_task_status"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
     }
     Views: {
@@ -80,6 +298,7 @@ export interface Database {
           id: string
           name: string
           owner: string | null
+          owner_id: string | null
           public: boolean | null
           updated_at: string | null
         }
@@ -91,6 +310,7 @@ export interface Database {
           id: string
           name: string
           owner?: string | null
+          owner_id?: string | null
           public?: boolean | null
           updated_at?: string | null
         }
@@ -102,17 +322,11 @@ export interface Database {
           id?: string
           name?: string
           owner?: string | null
+          owner_id?: string | null
           public?: boolean | null
           updated_at?: string | null
         }
-        Relationships: [
-          {
-            foreignKeyName: "buckets_owner_fkey"
-            columns: ["owner"]
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          }
-        ]
+        Relationships: []
       }
       migrations: {
         Row: {
@@ -144,6 +358,7 @@ export interface Database {
           metadata: Json | null
           name: string | null
           owner: string | null
+          owner_id: string | null
           path_tokens: string[] | null
           updated_at: string | null
           version: string | null
@@ -156,6 +371,7 @@ export interface Database {
           metadata?: Json | null
           name?: string | null
           owner?: string | null
+          owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
           version?: string | null
@@ -168,6 +384,7 @@ export interface Database {
           metadata?: Json | null
           name?: string | null
           owner?: string | null
+          owner_id?: string | null
           path_tokens?: string[] | null
           updated_at?: string | null
           version?: string | null
@@ -177,12 +394,6 @@ export interface Database {
             foreignKeyName: "objects_bucketId_fkey"
             columns: ["bucket_id"]
             referencedRelation: "buckets"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "objects_owner_fkey"
-            columns: ["owner"]
-            referencedRelation: "users"
             referencedColumns: ["id"]
           }
         ]
