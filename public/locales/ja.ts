@@ -42,6 +42,7 @@ const ja: I18n = {
   page: {
     home: 'ホーム',
     login: 'アプリへログイン',
+    signup: 'アカウントを作成',
     setting: {
       account: 'アカウント情報',
       profile: 'プロフィール',
@@ -62,6 +63,26 @@ const ja: I18n = {
       forgetPasswordLink: 'パスワードを忘れた場合',
       submit: 'ログイン',
       changeSignUpButton: 'アカウントを作成',
+    },
+  },
+  signup: {
+    form: {
+      title: 'アカウントを作成',
+      description: 'アカウントを作成するには詳細を入力してください。',
+      email: {
+        label: 'メールアドレス',
+      },
+      password: {
+        label: 'パスワード',
+      },
+      passwordConfirmation: {
+        label: 'パスワード（確認用）',
+        missMatch: 'パスワードが一致しません',
+      },
+      alreadyEmail: 'このメールアドレスは既に登録されています',
+      failed: 'メールアドレスまたは、パスワードが無効です',
+      submit: '作成',
+      changeLoginButton: 'ログインはこちら',
     },
   },
   home: {},

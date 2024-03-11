@@ -40,6 +40,7 @@ export type I18n = {
   page: {
     home: string
     login: string
+    signup: string
     setting: {
       account: string
       profile: string
@@ -60,6 +61,26 @@ export type I18n = {
       forgetPasswordLink: string
       submit: string
       changeSignUpButton: string
+    }
+  }
+  signup: {
+    form: {
+      title: string
+      description: string
+      email: {
+        label: string
+      }
+      password: {
+        label: string
+      }
+      passwordConfirmation: {
+        label: string
+        missMatch: string
+      }
+      alreadyEmail: string
+      failed: string
+      submit: string
+      changeLoginButton: string
     }
   }
   home: {}

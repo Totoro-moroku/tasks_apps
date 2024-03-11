@@ -2,7 +2,7 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-import { object, string } from 'yup'
+import { object, string, ref } from 'yup'
 import { useSetAtom } from 'jotai/react'
 import { useForm, Controller } from 'react-hook-form'
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -15,7 +15,12 @@ import CardFooter from '@material-tailwind/react/components/Card/CardFooter'
 import IconButton from '@material-tailwind/react/components/IconButton'
 import Input from '@material-tailwind/react/components/Input'
 import Typography from '@material-tailwind/react/components/Typography'
-import { Menu, MenuHandler, MenuList, MenuItem } from '@material-tailwind/react/components/Menu'
+import {
+  Menu,
+  MenuHandler,
+  MenuList,
+  MenuItem,
+} from '@material-tailwind/react/components/Menu'
 
 import XMarkIcon from '@heroicons/react/24/outline/XMarkIcon'
 import ExclamationCircleIcon from '@heroicons/react/24/outline/ExclamationCircleIcon'
@@ -25,13 +30,14 @@ import EyeSlashIcon from '@heroicons/react/24/outline/EyeSlashIcon'
 import Layout from '@/components/common/layouts/Layout'
 import useLocale from '@/hooks/useLocale'
 import useAuth from '@/hooks/useAuth'
-import { SignInType } from '@/hooks/useAuth'
+import { SignUpType } from '@/hooks/useAuth'
 import { circularProcessAtom } from '@/jotai/tools/atom'
+import clsx from 'clsx'
 
 export default function Login() {
   const { t, locale } = useLocale()
   const router = useRouter()
-  const { signIn } = useAuth()
+  const { signUp } = useAuth()
 
   const schema = object()
     .shape({
@@ -41,64 +47,86 @@ export default function Login() {
             ? `${v.label}${t.error.notEntered}`
             : `${t.error.notEntered}${v.label}`,
         )
-        .label(t.login.form.email.label)
+        .label(t.signup.form.email.label)
         .required((v) =>
           locale === 'ja'
             ? `${v.label}${t.error.notEntered}`
             : `${t.error.notEntered}${v.label}`,
         ),
       password: string()
-        .label(t.login.form.password.label)
+        .label(t.signup.form.password.label)
         .required((v) =>
           locale === 'ja'
             ? `${v.label}${t.error.notEntered}`
             : `${t.error.notEntered}${v.label}`,
         ),
+      passwordConfirmation: string()
+        .label(t.signup.form.passwordConfirmation.label)
+        .required((v) =>
+          locale === 'ja'
+            ? `${v.label}${t.error.notEntered}`
+            : `${t.error.notEntered}${v.label}`
+        )
+        .oneOf([ref("password")], () =>
+          t.signup.form.passwordConfirmation.missMatch
+        )
+        .required()
     })
-    .required()
 
-  const {
-    control,
-    handleSubmit
-  } = useForm({
+  const { control, handleSubmit, formState } = useForm({
     mode: 'onSubmit',
     shouldUnregister: true,
     resolver: yupResolver(schema),
   })
 
+  const { errors, isSubmitting, isLoading } = formState
+
   const [isShowPassword, setIsShowPassword] = useState(false)
   const [open, setOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState<string>()
   const setCircular = useSetAtom(circularProcessAtom)
 
-  const handelLogin = async ({ email, password }: SignInType) => {
+  const handelLogin = async ({ email, password }: SignUpType) => {
     if (!email || !password) {
       return
     }
 
     setCircular(true)
     try {
-      await signIn({ email , password })
-    } catch (error) {
+      await signUp({ email, password })
+    } catch (error: Error | any) {
+
+      console.log(error);
+
+      setErrorMessage(
+        error?.message === 'User already registered'
+          ? t.signup.form.alreadyEmail
+          : t.signup.form.failed
+      )
+
       setOpen(true)
       setCircular(false)
     }
   }
 
   return (
-    <Layout type="login" title={t.page.login}>
+    <Layout type="login" title={t.page.signup}>
       <div className="min-h-[100vh] sm:before:grow sm:before:h-auto sm:before:min-h-[10rem] sm:after:min-h-auto sm:before:block sm:after:block sm:after:grow block flex-shrink-0">
         <div className="block my-0 shrink-0 sm:mx-auto sm:max-w-[450px] sm:border sm:border-main sm:rounded-lg  bg-base-00">
           <div className="sm:h-auto sm:min-h-[500px] pt-14 px-12">
-            <Card className="h-screen sm:h-auto w-ful bg-base-00" shadow={false}>
+            <Card
+              className="h-screen sm:h-auto w-ful bg-base-00"
+              shadow={false}
+            >
               <Typography variant="h4" className="mb-1 text-main">
-                {t.login.form.title}
+                {t.signup.form.title}
               </Typography>
               <Typography
                 variant="paragraph"
                 color="gray"
                 className="mb-2 font-normal"
               >
-                {t.login.form.description}
+                {t.signup.form.description}
               </Typography>
               <CardBody className="w-full px-0">
                 <form action="relation" onSubmit={handleSubmit(handelLogin)}>
@@ -111,7 +139,7 @@ export default function Login() {
                         <div>
                           <Input
                             size="lg"
-                            label={t.login.form.email.label}
+                            label={t.signup.form.email.label}
                             className="text-no-webkit-fill"
                             {...field}
                             error={invalid || open}
@@ -136,7 +164,7 @@ export default function Login() {
                           <div className="relative flex w-full">
                             <Input
                               type={isShowPassword ? 'text' : 'password'}
-                              label={t.login.form.password.label}
+                              label={t.signup.form.password.label}
                               className="text-no-webkit-fill"
                               size="lg"
                               {...field}
@@ -150,9 +178,19 @@ export default function Login() {
                               }}
                             >
                               {isShowPassword ? (
-                                <EyeIcon className="w-6 h-6" />
+                                <EyeIcon
+                                  className={clsx(
+                                    'w-6 h-6',
+                                    error && 'text-error-main',
+                                  )}
+                                />
                               ) : (
-                                <EyeSlashIcon className="w-6 h-6" />
+                                <EyeSlashIcon
+                                  className={clsx(
+                                    'w-6 h-6',
+                                    error && 'text-error-main',
+                                  )}
+                                />
                               )}
                             </IconButton>
                           </div>
@@ -167,19 +205,56 @@ export default function Login() {
                         </div>
                       )}
                     />
-                    <div>
-                      <Typography className="text-sub group hover:text-main">
-                        <Link href={'/login'}>
-                          <Button
-                            variant="text"
-                            // size="sm"
-                            className="p-1 text-sm font-normal normal-case"
-                          >
-                            {t.login.form.forgetPasswordLink}
-                          </Button>
-                        </Link>
-                      </Typography>
-                    </div>
+                    <Controller
+                      name="passwordConfirmation"
+                      control={control}
+                      defaultValue=""
+                      render={({ field, fieldState: { invalid, error } }) => (
+                        <div>
+                        <div className="relative flex w-full">
+                          <Input
+                              type={isShowPassword ? 'text' : 'password'}
+                            label={t.signup.form.passwordConfirmation.label}
+                            className="text-no-webkit-fill"
+                            size="lg"
+                            {...field}
+                            error={invalid || open}
+                            />
+                            <IconButton
+                              variant="text"
+                              className="!absolute right-1 top-0.5 text-main"
+                              onClick={() => {
+                                setIsShowPassword(!isShowPassword)
+                              }}
+                            >
+                              {isShowPassword ? (
+                                <EyeIcon
+                                  className={clsx(
+                                    'w-6 h-6',
+                                    error && 'text-error-main',
+                                  )}
+                                />
+                              ) : (
+                                <EyeSlashIcon
+                                  className={clsx(
+                                    'w-6 h-6',
+                                    error && 'text-error-main',
+                                  )}
+                                />
+                              )}
+                            </IconButton>
+                        </div>
+                          {error && (
+                            <Typography
+                              variant="small"
+                              className="mt-2 ml-1 text-error-main"
+                            >
+                              {error.message}
+                            </Typography>
+                          )}
+                        </div>
+                      )}
+                    />
                     <Alert
                       icon={
                         <ExclamationCircleIcon className="w-6 h-6 text-error-main" />
@@ -191,27 +266,28 @@ export default function Login() {
                           variant="text"
                           size="sm"
                           className="flex-shrink-0"
-                          onClick={() => setOpen(false)}
+                          onClick={() => {
+                            setOpen(false)
+                          }}
                         >
                           <XMarkIcon className="w-6 h-6 text-error-main" />
                         </IconButton>
                       }
                     >
                       <Typography variant="small" className="text-error-main">
-                        {t.login.form.failed}
+                        {errorMessage}
                       </Typography>
                     </Alert>
                   </div>
                   <div className="flex">
                     <div className="basis-2/3">
                       <Typography>
-                        <Link href={'/signup'} className="px-2 py-2 ">
+                        <Link href={'/login'} className="px-2 py-2 ">
                           <Button
                             variant="text"
-                            // size="sm"
                             className="p-1 text-sm font-normal normal-case"
                           >
-                            {t.login.form.changeSignUpButton}
+                            {t.signup.form.changeLoginButton}
                           </Button>
                         </Link>
                       </Typography>
@@ -221,7 +297,7 @@ export default function Login() {
                         type="submit"
                         className="absolute right-0 w-32 tracking-widest bg-main"
                       >
-                        {t.login.form.submit}
+                        {t.signup.form.submit}
                       </Button>
                     </div>
                   </div>

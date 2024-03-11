@@ -42,6 +42,7 @@ const en: I18n = {
   page: {
     home: 'Home',
     login: 'Login App',
+    signup: 'Create Account',
     setting: {
       account: 'Account',
       profile: 'Profile',
@@ -62,6 +63,26 @@ const en: I18n = {
       forgetPasswordLink: 'Forgotten password ?',
       submit: 'Login',
       changeSignUpButton: 'Create account',
+    },
+  },
+  signup: {
+    form: {
+      title: 'Create Account',
+      description: 'Enter your details to create an account.',
+      email: {
+        label: 'E-mail',
+      },
+      password: {
+        label: 'Password',
+      },
+      passwordConfirmation: {
+        label: 'Password (confirmation)',
+        missMatch: 'Password does not match',
+      },
+      alreadyEmail: 'This email address is already registered',
+      failed: 'Invalid email address or password',
+      submit: 'Create account',
+      changeLoginButton: 'Login',
     },
   },
   home: {},
